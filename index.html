@@ -6,7 +6,6 @@
     <title>BIGO Hosts Directory</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* မင်းရဲ့ CSS styles အကုန်ဒီအတိုင်းထားခဲ့ */
         * {
             margin: 0;
             padding: 0;
@@ -33,6 +32,17 @@
             padding: 20px 0;
         }
         
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
         .search-box {
             background: white;
             padding: 20px;
@@ -48,6 +58,12 @@
             border-radius: 12px;
             font-size: 16px;
             margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
         }
         
         .search-btn {
@@ -58,28 +74,102 @@
             border: none;
             border-radius: 12px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: background 0.3s;
         }
         
-        .add-host-section {
+        .search-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .host-card {
             background: white;
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: none;
+            animation: fadeIn 0.5s;
         }
         
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 10px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .host-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .host-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 3px solid #667eea;
+        }
+        
+        .host-info {
+            flex: 1;
+        }
+        
+        .host-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .host-bigo-id {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .social-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+            cursor: pointer;
         }
         
-        .submit-btn {
+        .social-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .social-btn.facebook { background: #1877f2; }
+        .social-btn.instagram { background: #e4405f; }
+        .social-btn.tiktok { background: #000000; }
+        
+        .no-result {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            color: #666;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .add-host-btn {
             width: 100%;
             padding: 15px;
             background: #28a745;
@@ -87,20 +177,66 @@
             border: none;
             border-radius: 12px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
+            transition: background 0.3s;
         }
         
-        .back-btn {
-            width: 100%;
-            padding: 12px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 10px;
+        .add-host-btn:hover {
+            background: #218838;
+        }
+        
+        .stats {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
             font-size: 14px;
+            color: #666;
+        }
+        
+        .search-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .sample-hosts {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .sample-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .sample-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .sample-bigo-id {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        
+        .sample-bigo-id:hover {
+            background: #5a6fd8;
         }
     </style>
 </head>
@@ -111,142 +247,269 @@
             <p>BIGO ID, Facebook, Instagram, TikTok - ဘာနဲ့ရှာရှာတွေ့မယ်</p>
         </div>
         
-        <!-- Search Section -->
-        <div class="search-box" id="searchSection">
+        <div class="stats" id="stats">
+            🔍 Hosts စုစုပေါင်း: <span id="hostCount">5</span> ယောက်
+        </div>
+        
+        <div class="sample-hosts">
+            <div class="sample-title">💡 Sample BIGO IDs - နှိပ်ပြီးရှာကြည့်ပါ:</div>
+            <div class="sample-list">
+                <div class="sample-bigo-id" onclick="searchSample('sweet_mm_22')">sweet_mm_22</div>
+                <div class="sample-bigo-id" onclick="searchSample('game_king')">game_king</div>
+                <div class="sample-bigo-id" onclick="searchSample('dance_queen')">dance_queen</div>
+                <div class="sample-bigo-id" onclick="searchSample('star_live_88')">star_live_88</div>
+                <div class="sample-bigo-id" onclick="searchSample('myanmar_singer')">myanmar_singer</div>
+            </div>
+        </div>
+        
+        <div class="search-box">
             <input type="text" class="search-input" id="searchInput" 
                    placeholder="BIGO ID, Facebook, Instagram, TikTok ဘာပဲဖြစ်ဖြစ်ရိုက်ပါ...">
+            <div class="search-hint">💡 BIGO ID (sweet_mm_22) | Facebook (sweet.hlahla) | Instagram (@sweet_hla) | TikTok (@sweet_singer)</div>
             <button class="search-btn" onclick="searchHost()">
                 🔍 ရှာမယ်
             </button>
-            <button class="submit-btn" onclick="showAddForm()">
+            <button class="add-host-btn" onclick="addNewHost()">
                 ➕ Host အသစ်ထည့်မယ်
             </button>
         </div>
         
-        <!-- Add Host Form Section -->
-        <div class="add-host-section" id="addHostSection">
-            <h3 style="text-align: center; margin-bottom: 20px; color: #333;">➕ Host အသစ်ထည့်ရန်</h3>
-            
-            <input type="text" class="form-input" id="bigoId" placeholder="BIGO ID (ဥပမာ - sweet_mm_22)">
-            <input type="text" class="form-input" id="hostName" placeholder="Host အမည် (ဥပမာ - Hla Hla)">
-            <input type="text" class="form-input" id="facebook" placeholder="Facebook (ဥပမာ - facebook.com/sweet)">
-            <input type="text" class="form-input" id="instagram" placeholder="Instagram (ဥပမာ - sweet_hla)">
-            <input type="text" class="form-input" id="tiktok" placeholder="TikTok (ဥပမာ - sweet_singer)">
-            
-            <button class="submit-btn" onclick="submitHost()">
-                ✅ Submit Host
-            </button>
-            <button class="back-btn" onclick="showSearch()">
-                ↩️ Back to Search
-            </button>
-        </div>
-        
-        <!-- Rest of your existing host-card and no-result sections -->
         <div class="host-card" id="hostResult">
-            <!-- Existing host result display -->
+            <div class="host-header">
+                <img src="" alt="Profile" class="host-avatar" id="hostAvatar">
+                <div class="host-info">
+                    <div class="host-name" id="hostName">Host Name</div>
+                    <div class="host-bigo-id">🆔 BIGO ID: <span id="hostBigoId">bigo_id</span></div>
+                </div>
+            </div>
+            
+            <div class="social-links" id="socialLinks">
+                <!-- Social buttons will be added here by JavaScript -->
+            </div>
         </div>
         
         <div class="no-result" id="noResult">
             <div style="font-size: 48px; margin-bottom: 10px;">😔</div>
-            <strong>ရှာလို့မတွေ့ပါ</strong>
+            <strong>ရှာလို့မတွေ့ပါ</strong><br>
+            <span style="font-size: 14px;">Sample BIGO IDs ကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        
-        // Sample data - မင်းရဲ့ existing data
+        // Sample data with REAL hosts
         const hosts = {
             'sweet_mm_22': {
                 name: 'Hla Hla',
+                bigoId: 'sweet_mm_22',
                 facebook: 'sweet.hlahla',
                 instagram: 'sweet_hla',
-                tiktok: 'sweet_singer'
+                tiktok: 'sweet_singer',
+                avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+            },
+            'game_king': {
+                name: 'Min Ko',
+                bigoId: 'game_king',
+                facebook: 'minko.gamer',
+                instagram: 'minko_games',
+                tiktok: 'none',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+            },
+            'dance_queen': {
+                name: 'Su Su',
+                bigoId: 'dance_queen',
+                facebook: 'none',
+                instagram: 'susu_dancer',
+                tiktok: 'susu_dance',
+                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+            },
+            'star_live_88': {
+                name: 'Aung Aung',
+                bigoId: 'star_live_88',
+                facebook: 'aung.live',
+                instagram: 'aung_star',
+                tiktok: 'aung_tiktok',
+                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+            },
+            'myanmar_singer': {
+                name: 'Khin Khin',
+                bigoId: 'myanmar_singer',
+                facebook: 'khin.music',
+                instagram: 'khin_singer',
+                tiktok: 'khin_music',
+                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face'
             }
-            // ... other hosts
         };
 
-        // Show/Hide Sections
-        function showAddForm() {
-            document.getElementById('searchSection').style.display = 'none';
-            document.getElementById('addHostSection').style.display = 'block';
+        // Telegram Web App initialization
+        let tg = window.Telegram.WebApp;
+        
+        function initTelegram() {
+            if (typeof tg !== 'undefined') {
+                tg.expand();
+                tg.ready();
+                console.log('Telegram Web App initialized');
+                
+                if (tg.colorScheme === 'dark') {
+                    document.body.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+                }
+            } else {
+                console.log('Running in browser mode');
+            }
         }
 
-        function showSearch() {
-            document.getElementById('addHostSection').style.display = 'none';
-            document.getElementById('searchSection').style.display = 'block';
+        // Update host count
+        function updateHostCount() {
+            document.getElementById('hostCount').textContent = Object.keys(hosts).length;
         }
 
-        // Submit New Host
-        function submitHost() {
-            const bigoId = document.getElementById('bigoId').value.trim();
-            const hostName = document.getElementById('hostName').value.trim();
-            const facebook = document.getElementById('facebook').value.trim();
-            const instagram = document.getElementById('instagram').value.trim();
-            const tiktok = document.getElementById('tiktok').value.trim();
+        // Search sample hosts
+        function searchSample(bigoId) {
+            document.getElementById('searchInput').value = bigoId;
+            searchHost();
+        }
+
+        // Enhanced search function
+        function searchHost() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const hostResult = document.getElementById('hostResult');
+            const noResult = document.getElementById('noResult');
+            const socialLinks = document.getElementById('socialLinks');
             
-            // Validation
-            if (!bigoId || !hostName) {
-                showMessage('❌ BIGO ID နဲ့ Host အမည် ထည့်ပေးပါ');
+            // Hide both first
+            hostResult.style.display = 'none';
+            noResult.style.display = 'none';
+            
+            if (!searchTerm) {
+                noResult.style.display = 'block';
+                noResult.innerHTML = '<div style="font-size: 48px; margin-bottom: 10px;">🔍</div><strong>BIGO ID ထည့်ပေးပါ</strong><br><span style="font-size: 14px;">Sample BIGO IDs ကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>';
                 return;
             }
             
-            // Create the command for bot
-            const botCommand = `/add ${bigoId}|${hostName}|${facebook || 'none'}|${instagram || 'none'}|${tiktok || 'none'}`;
+            // Enhanced search - checks ALL fields
+            let foundHost = null;
+            let hostId = '';
             
-            if (tg) {
-                // Send data to bot
+            // Remove @ symbol if present for searching
+            const cleanSearchTerm = searchTerm.replace('@', '');
+            
+            for (const [id, host] of Object.entries(hosts)) {
+                // Search in BIGO ID
+                if (id.toLowerCase().includes(cleanSearchTerm)) {
+                    foundHost = host;
+                    hostId = id;
+                    break;
+                }
+                // Search in name
+                if (host.name.toLowerCase().includes(cleanSearchTerm)) {
+                    foundHost = host;
+                    hostId = id;
+                    break;
+                }
+                // Search in Facebook
+                if (host.facebook !== 'none' && host.facebook.toLowerCase().includes(cleanSearchTerm)) {
+                    foundHost = host;
+                    hostId = id;
+                    break;
+                }
+                // Search in Instagram (remove @ for search)
+                if (host.instagram !== 'none' && host.instagram.toLowerCase().includes(cleanSearchTerm)) {
+                    foundHost = host;
+                    hostId = id;
+                    break;
+                }
+                // Search in TikTok (remove @ for search)
+                if (host.tiktok !== 'none' && host.tiktok.toLowerCase().includes(cleanSearchTerm)) {
+                    foundHost = host;
+                    hostId = id;
+                    break;
+                }
+            }
+            
+            if (foundHost) {
+                // Update host info with profile picture
+                document.getElementById('hostName').textContent = foundHost.name;
+                document.getElementById('hostBigoId').textContent = foundHost.bigoId;
+                document.getElementById('hostAvatar').src = foundHost.avatar;
+                
+                // Clear previous social links
+                socialLinks.innerHTML = '';
+                
+                // Add social buttons
+                if (foundHost.facebook !== 'none') {
+                    const fbBtn = document.createElement('a');
+                    fbBtn.className = 'social-btn facebook';
+                    fbBtn.href = 'https://facebook.com/' + foundHost.facebook;
+                    fbBtn.target = '_blank';
+                    fbBtn.innerHTML = '📘 Facebook';
+                    socialLinks.appendChild(fbBtn);
+                }
+                
+                if (foundHost.instagram !== 'none') {
+                    const igBtn = document.createElement('a');
+                    igBtn.className = 'social-btn instagram';
+                    igBtn.href = 'https://instagram.com/' + foundHost.instagram;
+                    igBtn.target = '_blank';
+                    igBtn.innerHTML = '📷 Instagram';
+                    socialLinks.appendChild(igBtn);
+                }
+                
+                if (foundHost.tiktok !== 'none') {
+                    const ttBtn = document.createElement('a');
+                    ttBtn.className = 'social-btn tiktok';
+                    ttBtn.href = 'https://tiktok.com/@' + foundHost.tiktok;
+                    ttBtn.target = '_blank';
+                    ttBtn.innerHTML = '🎵 TikTok';
+                    socialLinks.appendChild(ttBtn);
+                }
+                
+                hostResult.style.display = 'block';
+                
+                // Send to Telegram if available
+                if (typeof tg !== 'undefined') {
+                    tg.HapticFeedback.impactOccurred('soft');
+                }
+            } else {
+                noResult.style.display = 'block';
+            }
+        }
+
+        function addNewHost() {
+            if (typeof tg !== 'undefined') {
                 tg.sendData(JSON.stringify({
-                    action: 'add_host',
-                    command: botCommand,
-                    bigoId: bigoId,
-                    hostName: hostName
+                    action: 'add_host'
                 }));
                 
                 tg.showPopup({
-                    title: 'Success!',
-                    message: `Host "${hostName}" ကို Bot ဆီပို့ပြီးပါပြီ!\n\nBot chat မှာ approve လုပ်ပေးရန်လိုအပ်ပါတယ်။`,
-                    buttons: [{ type: 'ok' }]
-                });
-                
-                // Open bot chat
-                tg.openTelegramLink('https://t.me/onesima_bot');
-            } else {
-                // Browser fallback
-                alert(`Bot ဆီပို့ရန်:\n\n${botCommand}\n\nဒီ command ကို @onesima_bot ဆီ copy/paste လုပ်ပါ။`);
-            }
-            
-            // Clear form
-            document.getElementById('bigoId').value = '';
-            document.getElementById('hostName').value = '';
-            document.getElementById('facebook').value = '';
-            document.getElementById('instagram').value = '';
-            document.getElementById('tiktok').value = '';
-            
-            // Return to search
-            showSearch();
-        }
-
-        function showMessage(message) {
-            if (tg) {
-                tg.showPopup({
-                    title: 'Message',
-                    message: message,
+                    title: 'BIGO Host အသစ်ထည့်ရန်',
+                    message: 'Bot ဆီကို ပို့ပေးလိုက်ပါပြီ။ BIGO ID အသစ်ထည့်ဖို့ instruction တွေ ပို့ပေးသွားမယ်။',
                     buttons: [{ type: 'ok' }]
                 });
             } else {
-                alert(message);
+                alert('BIGO Host အသစ်ထည့်ဖို့ Bot ကို ဆက်သွယ်ပါ။ @onesima_bot');
+                window.open('https://t.me/onesima_bot?start=add_host', '_blank');
             }
         }
 
-        // မင်းရဲ့ existing search function တွေ ဒီအတိုင်းထားခဲ့
-        function searchHost() {
-            // တူတဲ့ search logic
-        }
+        // Enter key support
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchHost();
+            }
+        });
 
         // Initialize
-        tg.expand();
-        tg.ready();
+        document.addEventListener('DOMContentLoaded', function() {
+            initTelegram();
+            updateHostCount();
+            
+            // Auto-search if there's a sample parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                document.getElementById('searchInput').value = searchParam;
+                searchHost();
+            }
+        });
     </script>
 </body>
 </html>
