@@ -200,6 +200,107 @@
         .sample-bigo-id:hover {
             background: #5a6fd8;
         }
+        
+        /* New styles for add host form */
+        .add-host-form {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .submit-btn {
+            flex: 1;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .cancel-btn {
+            flex: 1;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .add-host-instructions {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.5;
+            display: none;
+        }
+        
+        .instructions-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .instructions-list {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .instructions-list li {
+            margin-bottom: 5px;
+        }
+        
+        .close-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -226,9 +327,48 @@
             <button class="search-btn" onclick="searchHost()">
                 🔍 ရှာမယ်
             </button>
-            <button class="add-host-btn" onclick="addNewHost()">
+            <button class="add-host-btn" onclick="showAddHostForm()">
                 ➕ အသစ်ထည့်မယ်
             </button>
+        </div>
+        
+        <div class="add-host-form" id="addHostForm">
+            <div class="form-title">အသစ်ထည့်ရန်</div>
+            <div class="form-group">
+                <label class="form-label" for="newHostName">အမည်</label>
+                <input type="text" class="form-input" id="newHostName" placeholder="အပြည့်အစုံရေးပါ">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostBigoId">BIGO ID</label>
+                <input type="text" class="form-input" id="newHostBigoId" placeholder="BIGO ID ရေးပါ">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostFacebook">Facebook</label>
+                <input type="text" class="form-input" id="newHostFacebook" placeholder="Facebook username (မရှိရင် ချန်ထားပါ)">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostInstagram">Instagram</label>
+                <input type="text" class="form-input" id="newHostInstagram" placeholder="Instagram username (မရှိရင် ချန်ထားပါ)">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostTiktok">TikTok</label>
+                <input type="text" class="form-input" id="newHostTiktok" placeholder="TikTok username (မရှိရင် ချန်ထားပါ)">
+            </div>
+            <div class="form-buttons">
+                <button class="cancel-btn" onclick="hideAddHostForm()">မထည့်တော့ပါ</button>
+                <button class="submit-btn" onclick="submitNewHost()">အတည်ပြုပြီးပို့မယ်</button>
+            </div>
+        </div>
+        
+        <div class="add-host-instructions" id="addHostInstructions">
+            <div class="instructions-title">အသစ်ထည့်ရန် ညွှန်ကြားချက်များ</div>
+            <ul class="instructions-list">
+                <li>နမူနာပြထားတဲ့အတိုင်း အချက်အလက်များကိုဖြည့်ပေးပါရှင့်</li>
+                <li>အတည်ပြုပြီးရင် ခလုတ်ကို နှိပ်လိုက်ပါရှင့်</li>
+                <li>အချက်အလက်များကို စစ်ဆေးပြီးရင်ဒီရှာဖွေရေးစနစ်ထဲထည့်ထားလိုက်ပါပြီ</li>
+                <li>အကူအညီလိုပါက @onesima_bot ကို စိတ်ကြိုက်မေးနိုင်ပါတယ်ရှင့်တယ်ရှင့်</li>
+            </ul>
+            <button class="close-btn" onclick="hideInstructions()">ပိတ်မယ်</button>
         </div>
         
         <div class="host-card" id="hostResult">
@@ -248,7 +388,12 @@
         <div class="no-result" id="noResult">
             <div style="font-size: 40px; margin-bottom: 8px;">😔</div>
             <strong>ရှာလို့မတွေ့ပါ</strong><br>
-            <span style="font-size: 12px;">နမူနာ ID များကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>
+            <span style="font-size: 12px;">နမူနာ ID များကိုစမ်းရှာကြည့်ကြည့်ပါ</span>
+            <div style="margin-top: 10px;">
+                <button class="add-host-btn" onclick="showAddHostForm()" style="font-size: 12px; padding: 6px 12px;">
+                    ➕ ဒီအချက်အလက်ကို အသစ်ထည့်မယ်
+                </button>
+            </div>
         </div>
     </div>
 
@@ -327,6 +472,8 @@
             // Hide both first
             hostResult.style.display = 'none';
             noResult.style.display = 'none';
+            hideAddHostForm();
+            hideInstructions();
             
             if (!searchTerm) {
                 noResult.style.display = 'block';
@@ -422,21 +569,79 @@
             }
         }
 
-        function addNewHost() {
+        function showAddHostForm() {
+            document.getElementById('addHostForm').style.display = 'block';
+            document.getElementById('hostResult').style.display = 'none';
+            document.getElementById('noResult').style.display = 'none';
+            document.getElementById('addHostInstructions').style.display = 'none';
+        }
+        
+        function hideAddHostForm() {
+            document.getElementById('addHostForm').style.display = 'none';
+            // Clear form fields
+            document.getElementById('newHostName').value = '';
+            document.getElementById('newHostBigoId').value = '';
+            document.getElementById('newHostFacebook').value = '';
+            document.getElementById('newHostInstagram').value = '';
+            document.getElementById('newHostTiktok').value = '';
+        }
+        
+        function showInstructions() {
+            document.getElementById('addHostInstructions').style.display = 'block';
+            document.getElementById('addHostForm').style.display = 'none';
+        }
+        
+        function hideInstructions() {
+            document.getElementById('addHostInstructions').style.display = 'none';
+        }
+        
+        function submitNewHost() {
+            const name = document.getElementById('newHostName').value.trim();
+            const bigoId = document.getElementById('newHostBigoId').value.trim();
+            const facebook = document.getElementById('newHostFacebook').value.trim();
+            const instagram = document.getElementById('newHostInstagram').value.trim();
+            const tiktok = document.getElementById('newHostTiktok').value.trim();
+            
+            if (!name || !bigoId) {
+                alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
+                return;
+            }
+            
+            // Create host data object
+            const newHost = {
+                name: name,
+                bigoId: bigoId,
+                facebook: facebook || 'none',
+                instagram: instagram || 'none',
+                tiktok: tiktok || 'none',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+            };
+            
+            // In a real app, you would send this data to a server
+            // For demo purposes, we'll just show a success message
+            
             if (typeof tg !== 'undefined') {
+                // Send data to Telegram bot
                 tg.sendData(JSON.stringify({
-                    action: 'add_host'
+                    action: 'add_host',
+                    host_data: newHost
                 }));
                 
                 tg.showPopup({
-                    title: 'အသစ်ထည့်ရန်',
-                    message: 'Bot ဆီကို ပို့ပေးလိုက်ပါပြီ။ အသစ်ထည့်ဖို့ instruction တွေ ပို့ပေးသွားမယ်။',
+                    title: 'ကျေးဇူးတင်ပါတယ်',
+                    message: 'သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။ အတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။',
                     buttons: [{ type: 'ok' }]
                 });
             } else {
-                alert('အသစ်ထည့်ဖို့ Bot ကို ဆက်သွယ်ပါ။ @onesima_bot');
-                window.open('https://t.me/onesima_bot?start=add_host', '_blank');
+                // Fallback for non-Telegram environment
+                alert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
+                      '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
+                
+                // For demo, add to local hosts object
+                hosts[bigoId] = newHost;
             }
+            
+            hideAddHostForm();
         }
 
         // Enter key support
