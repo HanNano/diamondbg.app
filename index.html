@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIGO Hosts Directory</title>
+    <title>One2World Directory</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -28,74 +28,69 @@
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding: 20px 0;
         }
         
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 8px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .header p {
             opacity: 0.9;
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.4;
         }
         
         .search-box {
             background: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
         }
         
         .search-input {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
         
         .search-btn {
             width: 100%;
-            padding: 15px;
+            padding: 10px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 14px;
             cursor: pointer;
-            transition: background 0.3s;
+            margin-bottom: 8px;
         }
         
-        .search-btn:hover {
-            background: #5a6fd8;
+        .add-host-btn {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
         }
         
         .host-card {
             background: white;
             padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             margin-bottom: 15px;
             display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .host-header {
@@ -105,8 +100,8 @@
         }
         
         .host-avatar {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             object-fit: cover;
             margin-right: 15px;
@@ -118,7 +113,7 @@
         }
         
         .host-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
             margin-bottom: 5px;
@@ -127,32 +122,33 @@
         .host-bigo-id {
             color: #ff6b6b;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
         
         .social-links {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         
         .social-btn {
-            padding: 10px 16px;
+            padding: 8px 12px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             text-decoration: none;
             color: white;
-            font-size: 14px;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             transition: transform 0.2s;
             cursor: pointer;
         }
         
         .social-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
         
         .social-btn.facebook { background: #1877f2; }
@@ -161,76 +157,42 @@
         
         .no-result {
             background: white;
-            padding: 30px 20px;
-            border-radius: 20px;
+            padding: 25px 15px;
+            border-radius: 15px;
             text-align: center;
             color: #666;
             display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .add-host-btn {
-            width: 100%;
-            padding: 15px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.3s;
-        }
-        
-        .add-host-btn:hover {
-            background: #218838;
-        }
-        
-        .stats {
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .search-hint {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .sample-hosts {
             background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
         
         .sample-title {
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #333;
             text-align: center;
+            font-size: 13px;
         }
         
         .sample-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
         }
         
         .sample-bigo-id {
             background: #667eea;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -243,16 +205,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 BIGO Hosts Directory</h1>
-            <p>BIGO ID, Facebook, Instagram, TikTok - ဘာနဲ့ရှာရှာတွေ့မယ်</p>
-        </div>
-        
-        <div class="stats" id="stats">
-            🔍 Hosts စုစုပေါင်း: <span id="hostCount">5</span> ယောက်
+            <h1>One2World Directory</h1>
+            <p>BIGO ID, Facebook, Instagram, TikTok တစ်ခုခုကို မှတ်မိယုံနဲ့ ကိုကို/မမ တို့ရဲ့ ချစ်ခင်ရတဲ့သူတွေကို အမြန်ဆုံးပြန်တွေ့နိုင်ပါပြီ</p>
         </div>
         
         <div class="sample-hosts">
-            <div class="sample-title">💡 Sample BIGO IDs - နှိပ်ပြီးရှာကြည့်ပါ:</div>
+            <div class="sample-title">💡 နမူနာ ID များ - နှိပ်ပြီးရှာကြည့်ပါ:</div>
             <div class="sample-list">
                 <div class="sample-bigo-id" onclick="searchSample('sweet_mm_22')">sweet_mm_22</div>
                 <div class="sample-bigo-id" onclick="searchSample('game_king')">game_king</div>
@@ -265,12 +223,11 @@
         <div class="search-box">
             <input type="text" class="search-input" id="searchInput" 
                    placeholder="BIGO ID, Facebook, Instagram, TikTok ဘာပဲဖြစ်ဖြစ်ရိုက်ပါ...">
-            <div class="search-hint">💡 BIGO ID (sweet_mm_22) | Facebook (sweet.hlahla) | Instagram (@sweet_hla) | TikTok (@sweet_singer)</div>
             <button class="search-btn" onclick="searchHost()">
                 🔍 ရှာမယ်
             </button>
             <button class="add-host-btn" onclick="addNewHost()">
-                ➕ Host အသစ်ထည့်မယ်
+                ➕ အသစ်ထည့်မယ်
             </button>
         </div>
         
@@ -289,9 +246,9 @@
         </div>
         
         <div class="no-result" id="noResult">
-            <div style="font-size: 48px; margin-bottom: 10px;">😔</div>
+            <div style="font-size: 40px; margin-bottom: 8px;">😔</div>
             <strong>ရှာလို့မတွေ့ပါ</strong><br>
-            <span style="font-size: 14px;">Sample BIGO IDs ကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>
+            <span style="font-size: 12px;">နမူနာ ID များကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>
         </div>
     </div>
 
@@ -347,19 +304,11 @@
             if (typeof tg !== 'undefined') {
                 tg.expand();
                 tg.ready();
-                console.log('Telegram Web App initialized');
                 
                 if (tg.colorScheme === 'dark') {
                     document.body.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
                 }
-            } else {
-                console.log('Running in browser mode');
             }
-        }
-
-        // Update host count
-        function updateHostCount() {
-            document.getElementById('hostCount').textContent = Object.keys(hosts).length;
         }
 
         // Search sample hosts
@@ -381,7 +330,7 @@
             
             if (!searchTerm) {
                 noResult.style.display = 'block';
-                noResult.innerHTML = '<div style="font-size: 48px; margin-bottom: 10px;">🔍</div><strong>BIGO ID ထည့်ပေးပါ</strong><br><span style="font-size: 14px;">Sample BIGO IDs ကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>';
+                noResult.innerHTML = '<div style="font-size: 40px; margin-bottom: 8px;">🔍</div><strong>ID ထည့်ပေးပါ</strong><br><span style="font-size: 12px;">နမူနာ ID များကိုနှိပ်ပြီး စမ်းကြည့်ပါ</span>';
                 return;
             }
             
@@ -480,12 +429,12 @@
                 }));
                 
                 tg.showPopup({
-                    title: 'BIGO Host အသစ်ထည့်ရန်',
-                    message: 'Bot ဆီကို ပို့ပေးလိုက်ပါပြီ။ BIGO ID အသစ်ထည့်ဖို့ instruction တွေ ပို့ပေးသွားမယ်။',
+                    title: 'အသစ်ထည့်ရန်',
+                    message: 'Bot ဆီကို ပို့ပေးလိုက်ပါပြီ။ အသစ်ထည့်ဖို့ instruction တွေ ပို့ပေးသွားမယ်။',
                     buttons: [{ type: 'ok' }]
                 });
             } else {
-                alert('BIGO Host အသစ်ထည့်ဖို့ Bot ကို ဆက်သွယ်ပါ။ @onesima_bot');
+                alert('အသစ်ထည့်ဖို့ Bot ကို ဆက်သွယ်ပါ။ @onesima_bot');
                 window.open('https://t.me/onesima_bot?start=add_host', '_blank');
             }
         }
@@ -500,15 +449,6 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initTelegram();
-            updateHostCount();
-            
-            // Auto-search if there's a sample parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const searchParam = urlParams.get('search');
-            if (searchParam) {
-                document.getElementById('searchInput').value = searchParam;
-                searchHost();
-            }
         });
     </script>
 </body>
