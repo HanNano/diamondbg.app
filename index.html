@@ -251,6 +251,46 @@
             font-size: 14px;
         }
         
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .file-input:hover {
+            background: #e9ecef;
+        }
+        
+        .preview-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            display: none;
+        }
+        
+        .remove-photo {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
         .form-buttons {
             display: flex;
             gap: 10px;
@@ -324,6 +364,7 @@
             <div>• TikTok: username သာထည့်ပါရှင့် (ဥပမာ: username)</div>
             <div>• Facebook: username ပါပဲရှင့်</div>
             <div>• Instagram: username ပဲရှင့်</div>
+            <div>• Profile Picture: ကိုယ်ပိုင်ဓာတ်ပုံ တင်နိုင်ပါတယ်</div>
         </div>
         
         <div class="sample-hosts">
@@ -363,6 +404,20 @@
                 <label class="form-label" for="newHostBigoId">BIGO ID *</label>
                 <input type="text" class="form-input" id="newHostBigoId" placeholder="123456" required>
             </div>
+
+            <!-- Profile Picture Upload Section -->
+            <div class="form-group">
+                <label class="form-label">Profile Picture</label>
+                <input type="file" id="avatarUpload" accept="image/*" class="file-input" 
+                       onchange="previewImage(this)">
+                <div class="preview-container">
+                    <img id="avatarPreview" class="avatar-preview" alt="Preview">
+                    <button type="button" class="remove-photo" onclick="removePhoto()" style="display: none;">
+                        ❌ ဓာတ်ပုံ ဖျက်မယ်
+                    </button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label" for="newHostFacebook">Facebook</label>
                 <input type="text" class="form-input" id="newHostFacebook" placeholder="username (facebook.com/username)">
@@ -382,10 +437,6 @@
             <div class="form-group">
                 <label class="form-label" for="newHostYoutube">YouTube</label>
                 <input type="text" class="form-input" id="newHostYoutube" placeholder="channel (youtube.com/channel)">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="newHostAvatar">Profile Picture URL (Optional)</label>
-                <input type="text" class="form-input" id="newHostAvatar" placeholder="https://example.com/photo.jpg">
             </div>
             <div class="form-buttons">
                 <button class="cancel-btn" onclick="hideAddHostForm()">မထည့်တော့ပါ</button>
@@ -426,80 +477,96 @@
         // ==================== CONFIGURATION ====================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7UTzoLqbAhPc01yHue_q6rWlrObEUZBaR4ZYszzsyWqex1GvvASYNTk7omPEB920N/exec';
         
-        // ==================== FIXED PROFILE PICTURES ====================
-        const defaultAvatars = [
-            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face', // Male 1
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face', // Male 2
-            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face', // Female 1
-            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face', // Female 2
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face', // Male 3
-            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face'  // Female 3
-        ];
-
-        // ==================== INITIALIZATION ====================
+        // ==================== VARIABLES ====================
         let tg = window.Telegram.WebApp;
         let hosts = {};
+        let uploadedAvatar = null;
 
-        // Sample data with FIXED TikTok links and consistent avatars
+        // Sample data
         const sampleHosts = {
             'sweet_mm_22': {
                 name: 'Hla Hla',
                 bigoId: 'sweet_mm_22',
                 facebook: 'sweet.hlahla',
                 instagram: 'sweet_hla',
-                tiktok: 'sweet_singer', // FIXED: username only
+                tiktok: 'sweet_singer',
                 telegram: 'hlahla',
                 youtube: 'hlahla_music',
-                avatar: defaultAvatars[2] // Consistent female avatar
+                avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
             },
             'game_king': {
                 name: 'Min Ko',
                 bigoId: 'game_king',
                 facebook: 'minko.gamer',
                 instagram: 'minko_games',
-                tiktok: 'minko_gaming', // FIXED: username only
+                tiktok: 'minko_gaming',
                 telegram: 'minko',
                 youtube: 'minko_gaming',
-                avatar: defaultAvatars[0] // Consistent male avatar
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
             },
             'dance_queen': {
                 name: 'Su Su',
                 bigoId: 'dance_queen',
                 facebook: 'susu.dancer',
                 instagram: 'susu_dancer',
-                tiktok: 'susu_dance', // FIXED: username only
+                tiktok: 'susu_dance',
                 telegram: 'susu',
                 youtube: 'susu_dance',
-                avatar: defaultAvatars[3] // Consistent female avatar
+                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
             }
         };
 
-        // ==================== FIXED SOCIAL BUTTONS FUNCTIONS ====================
+        // ==================== IMAGE UPLOAD FUNCTIONS ====================
+        function previewImage(input) {
+            const preview = document.getElementById('avatarPreview');
+            const removeBtn = document.querySelector('.remove-photo');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    removeBtn.style.display = 'block';
+                    uploadedAvatar = e.target.result; // Store base64 image
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removePhoto() {
+            const preview = document.getElementById('avatarPreview');
+            const fileInput = document.getElementById('avatarUpload');
+            const removeBtn = document.querySelector('.remove-photo');
+            
+            preview.style.display = 'none';
+            removeBtn.style.display = 'none';
+            fileInput.value = '';
+            uploadedAvatar = null;
+        }
+
+        // ==================== SOCIAL BUTTONS FUNCTIONS ====================
         function createSocialButtons(host) {
             const socialLinks = document.getElementById('socialLinks');
             socialLinks.innerHTML = '';
             
-            // FIXED: Facebook link
             if (host.facebook && host.facebook !== 'none') {
                 createSocialButton('facebook', 'https://facebook.com/' + host.facebook, '📘 Facebook', socialLinks);
             }
             
-            // FIXED: Instagram link
             if (host.instagram && host.instagram !== 'none') {
                 createSocialButton('instagram', 'https://instagram.com/' + host.instagram, '📷 Instagram', socialLinks);
             }
             
-            // FIXED: TikTok link - CORRECT FORMAT
             if (host.tiktok && host.tiktok !== 'none') {
                 createSocialButton('tiktok', 'https://www.tiktok.com/@' + host.tiktok, '🎵 TikTok', socialLinks);
             }
             
-            // FIXED: Telegram link
             if (host.telegram && host.telegram !== 'none') {
                 createSocialButton('telegram', 'https://t.me/' + host.telegram, '✈️ Telegram', socialLinks);
             }
             
-            // FIXED: YouTube link
             if (host.youtube && host.youtube !== 'none') {
                 createSocialButton('youtube', 'https://youtube.com/@' + host.youtube, '📺 YouTube', socialLinks);
             }
@@ -521,20 +588,7 @@
             button.href = url;
             button.target = '_blank';
             button.innerHTML = text;
-            
-            // Test the link when clicked
-            button.onclick = function(e) {
-                console.log(`Opening: ${url}`);
-                // Let the default link behavior happen
-            };
-            
             container.appendChild(button);
-        }
-
-        // ==================== FIXED AVATAR FUNCTION ====================
-        function getRandomAvatar() {
-            // Return a random avatar from our fixed list
-            return defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
         }
 
         // ==================== MAIN FUNCTIONS ====================
@@ -556,7 +610,6 @@
                     hosts = {};
                     result.data.forEach(item => {
                         if (item.BIGO_ID) {
-                            // FIXED: Use provided avatar or random from fixed list
                             hosts[item.BIGO_ID] = {
                                 name: item.Name || '',
                                 bigoId: item.BIGO_ID,
@@ -565,7 +618,7 @@
                                 tiktok: item.TikTok || 'none',
                                 telegram: item.Telegram || 'none',
                                 youtube: item.YouTube || 'none',
-                                avatar: item.Avatar || getRandomAvatar() // FIXED: Consistent avatars
+                                avatar: item.Avatar || getDefaultAvatar()
                             };
                         }
                     });
@@ -580,6 +633,11 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        function getDefaultAvatar() {
+            // Simple default avatar
+            return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face';
         }
 
         async function reloadData() {
@@ -600,7 +658,7 @@
                                 tiktok: item.TikTok || 'none',
                                 telegram: item.Telegram || 'none',
                                 youtube: item.YouTube || 'none',
-                                avatar: item.Avatar || getRandomAvatar() // FIXED: Consistent avatars
+                                avatar: item.Avatar || getDefaultAvatar()
                             };
                         }
                     });
@@ -671,6 +729,8 @@
             document.getElementById('hostResult').style.display = 'none';
             document.getElementById('noResult').style.display = 'none';
             hideSuccessMessage();
+            // Reset uploaded image
+            removePhoto();
         }
         
         function hideAddHostForm() {
@@ -682,7 +742,8 @@
             document.getElementById('newHostTiktok').value = '';
             document.getElementById('newHostTelegram').value = '';
             document.getElementById('newHostYoutube').value = '';
-            document.getElementById('newHostAvatar').value = '';
+            // Reset uploaded image
+            removePhoto();
         }
 
         function showSuccessMessage() {
@@ -699,7 +760,92 @@
             document.getElementById('loading').style.display = 'block';
         }
 
-     တယ်?\n\n' +
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function submitNewHost() {
+            const name = document.getElementById('newHostName').value.trim();
+            const bigoId = document.getElementById('newHostBigoId').value.trim();
+            const facebook = document.getElementById('newHostFacebook').value.trim();
+            const instagram = document.getElementById('newHostInstagram').value.trim();
+            const tiktok = document.getElementById('newHostTiktok').value.trim();
+            const telegram = document.getElementById('newHostTelegram').value.trim();
+            const youtube = document.getElementById('newHostYoutube').value.trim();
+            
+            if (!name || !bigoId) {
+                alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
+                return;
+            }
+            
+            try {
+                showLoading('အချက်အလက်များ သိမ်းဆည်းနေပါသည်...');
+                
+                // For now, we'll use a default avatar since we can't upload to Google Sheets directly
+                // In a real app, you'd need to upload to a image hosting service first
+                let avatarUrl = getDefaultAvatar();
+                
+                if (uploadedAvatar) {
+                    // In a real implementation, you would:
+                    // 1. Upload the image to a service like ImgBB, Cloudinary, etc.
+                    // 2. Get the URL and use it here
+                    // For now, we'll use the default avatar and show a message
+                    alert('📸 ဓာတ်ပုံအတွက် ကျေးဇူးတင်ပါတယ်! လောလောဆယ် default profile picture သုံးထားပါတယ်။');
+                }
+                
+                const formData = new URLSearchParams();
+                formData.append('action', 'addData');
+                formData.append('name', name);
+                formData.append('bigo_id', bigoId);
+                formData.append('facebook', facebook || 'none');
+                formData.append('instagram', instagram || 'none');
+                formData.append('tiktok', tiktok || 'none');
+                formData.append('telegram', telegram || 'none');
+                formData.append('youtube', youtube || 'none');
+                formData.append('avatar', avatarUrl);
+                
+                console.log('Sending data to Google Sheets...');
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                console.log('Google Sheets Response:', result);
+                
+                if (result.status === 'success') {
+                    // Immediately add to local hosts object
+                    hosts[bigoId] = {
+                        name: name,
+                        bigoId: bigoId,
+                        facebook: facebook || 'none',
+                        instagram: instagram || 'none',
+                        tiktok: tiktok || 'none',
+                        telegram: telegram || 'none',
+                        youtube: youtube || 'none',
+                        avatar: avatarUrl
+                    };
+                    
+                    console.log('Added to local hosts:', hosts[bigoId]);
+                    
+                    showSuccessMessage();
+                    hideAddHostForm();
+                    
+                    // Auto-search for the new host
+                    document.getElementById('searchInput').value = bigoId;
+                    setTimeout(() => {
+                        searchHost();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const confirmSave = confirm(
+                    'အချက်အလက်များ သီမ်းပြီးပါ။\n\n' +
+                    'ဒီ ID ကို ချက်ချင်းရှာကြည့်မလား?\n\n' +
                     'BIGO ID: ' + bigoId
                 );
                 
@@ -713,7 +859,7 @@
                         tiktok: tiktok || 'none',
                         telegram: telegram || 'none',
                         youtube: youtube || 'none',
-                        avatar: avatar || getRandomAvatar() // FIXED: Consistent avatar
+                        avatar: getDefaultAvatar()
                     };
                     
                     hideAddHostForm();
