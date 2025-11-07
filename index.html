@@ -371,7 +371,7 @@
 
     <script>
         // Google Apps Script URL - သင့်ရဲ့ Google Apps Script URL ကို ဒီနေရာမှာ ထည့်ပါ
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_PdcAIuacPDOo_owPYFUnkL0CRZ6F2HpZ6MSd_am2-jwCROSZEJ3DTFecS-cAtbFv/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdYNPY2QBQdZsr_uQfIjwthsB-smi7xo8RVP8i5uMHswU8x-lISPh2DpqXdXPJfXNL/exec';
         
         // Telegram Web App initialization
         let tg = window.Telegram.WebApp;
@@ -635,83 +635,72 @@
             const tiktok = document.getElementById('newHostTiktok').value.trim();
             const telegram = document.getElementById('newHostTelegram').value.trim();
             const youtube = document.getElementById('newHostYoutube').value.trim();
-    
-        if (!name || !bigoId) {
-        alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
-        return;
-        }
-    
-        try {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('loading').textContent = '🔄 အချက်အလက်များ သိမ်းဆည်းနေပါသည်...';
-        
-        // Prepare data for sending
-        const formData = {
-            action: 'addData',
-            name: name,
-            bigo_id: bigoId,
-            facebook: facebook || 'none',
-            instagram: instagram || 'none', 
-            tiktok: tiktok || 'none',
-            telegram: telegram || 'none',
-            youtube: youtube || 'none'
-        };
-        
-        console.log('Sending data:', formData);
-        
-        const params = new URLSearchParams(formData);
-        
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params
-        });     
-        
-        const result = await response.json();
-        console.log('Server response:', result);
-        
-        if (result.status === 'success') {
-            // Success message
-            alert('✅ အောင်မြင်ပါသည်! အချက်အလက်များ သိမ်းဆည်းပြီးပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId);
+            
+            if (!name || !bigoId) {
+                alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
+                return;
+            }
+            
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('loading').textContent = '🔄 အချက်အလက်များကို ပို့နေပါသည်...';
                 
-            // Add to local hosts object for immediate use
-            hosts[bigoId] = {
-                name: name,
-                bigoId: bigoId,
-                facebook: facebook || 'none',
-                instagram: instagram || 'none',
-                tiktok: tiktok || 'none',
-                telegram: telegram || 'none',
-                youtube: youtube || 'none',
-                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
-            };
-                                    
-            hideAddHostForm();
-
-            // Auto-search for the newly added host
-            document.getElementById('searchInput').value = bigoId;
-            setTimeout(() => searchHost(), 500);
-        } else {
-            throw new Error(result.data || 'Unknown error');
+                const formData = {
+                    action: 'addData',
+                    name: name,
+                    bigo_id: bigoId,
+                    facebook: facebook || 'none',
+                    instagram: instagram || 'none',
+                    tiktok: tiktok || 'none',
+                    telegram: telegram || 'none',
+                    youtube: youtube || 'none'
+                };
+                console.log('Sending data:', formData);
+                const params = new URLSearchParams(formData);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                });
+                
+                const result = await response.json();
+                console.log('Add host response:', result);
+                
+                if (result.status === 'success') {
+                    if (typeof tg !== 'undefined') {
+                        tg.HapticFeedback.impactOccurred('success');
+                        tg.showAlert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
+                                     '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
+                    } else {
+                    alert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
+                              '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
+                    }
+                    
+                    // Add to local hosts object for immediate use
+                    hosts[bigoId] = {
+                        name: name,
+                        bigoId: bigoId,
+                        facebook: facebook || 'none',
+                        instagram: instagram || 'none',
+                        tiktok: tiktok || 'none',
+                        telegram: telegram || 'none',
+                        youtube: youtube || 'none',
+                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                    };
+                    
+                    hideAddHostForm();
+                } else {
+                    throw new Error(result.data);
+                }
+            } catch (error) {
+                console.error('Error adding host:', error);
+                alert('အချက်အလက်များ သိမ်းဆည်းရာတွင် အမှားတစ်ခုဖြစ်ပွားနေပါသည်။ ကျေးဇူးပြု၍ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
         }
-    } catch (error) {
-        console.error('Error adding host:', error);
-        
-         // More specific error messages
-        if (error.message.includes('CORS')) {
-            alert('❌ CORS Error: Google Apps Script URL ကို ပြန်စစ်ပါ\n\n1. Deploy > New deployment လုပ်ပါ\n2. Execute as: "Me" ရွေးပါ\n3. Who has access: "Anyone" ရွေးပါ');
-        } else if (error.message.includes('Network')) {
-            alert('❌ Network Error: အင်တာနက် ချိတ်ဆက်မှု ပြန်စစ်ပါ');
-        } else {
-            alert('❌ အမှား: ' + error.message + '\n\nGoogle Apps Script URL နဲ့ Sheet ID ကို ပြန်စစ်ပါ');
-        }
-    } finally {
-        document.getElementById('loading').style.display = 'none';
-    }
-}
-
 
         // Enter key support
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
