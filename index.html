@@ -294,6 +294,22 @@
             text-align: center;
             display: none;
         }
+
+        .instructions {
+            background: rgba(255,255,255,0.9);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .instructions-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -303,8 +319,15 @@
             <p>BIGO ID, Facebook, Instagram, TikTok တစ်ခုခုကို ရိုက်ပြီး ရှာလိုက်ယုံနဲ့ သင့်ရဲ့ Celi တစ်ယောက်ကိုပြန်တွေ့နိုင်ပါပြီ</p>
         </div>
         
+        <div class="instructions">
+            <div class="instructions-title">📝 မှတ်ချက်များ:</div>
+            <div>• TikTok: username သာထည့်ပါရှင့် (ဥပမာ: username)</div>
+            <div>• Facebook: username ပါပဲရှင့်</div>
+            <div>• Instagram: username ပဲရှင့်</div>
+        </div>
+        
         <div class="sample-hosts">
-            <div class="sample-title">💡 နမူနာ ID များ - နှိပ်ပြီးရှာကြည့်ပါ:</div>
+            <div class="sample-title">💡 နမူနာ ID များ - နှိပ်ပြီးအစမ်းရှာကြည့်ပါ:</div>
             <div class="sample-list">
                 <div class="sample-bigo-id" onclick="searchSample('sweet_mm_22')">sweet_mm_22</div>
                 <div class="sample-bigo-id" onclick="searchSample('game_king')">game_king</div>
@@ -322,12 +345,12 @@
                 ➕ အသစ်ထည့်မယ်
             </button>
             <button class="reload-btn" onclick="reloadData()">
-                🔄 Google Sheets မှ အချက်အလက်များ ပြန်ခေါ်မယ်
+                🔄 Reload Data
             </button>
         </div>
 
         <div class="success-message" id="successMessage">
-            ✅ အောင်မြင်ပါသည်! အချက်အလက်များ သိမ်းဆည်းပြီးပါပြီ။
+            ✅ အချက်အလက်များ သိမ်းဆည်းလိုက်ပါပြီရှင့်။
         </div>
         
         <div class="add-host-form" id="addHostForm">
@@ -342,23 +365,27 @@
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostFacebook">Facebook</label>
-                <input type="text" class="form-input" id="newHostFacebook" placeholder="Facebook Username">
+                <input type="text" class="form-input" id="newHostFacebook" placeholder="username (facebook.com/username)">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostInstagram">Instagram</label>
-                <input type="text" class="form-input" id="newHostInstagram" placeholder="Instagram username">
+                <input type="text" class="form-input" id="newHostInstagram" placeholder="username (instagram.com/username)">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostTiktok">TikTok</label>
-                <input type="text" class="form-input" id="newHostTiktok" placeholder="TikTok username">
+                <input type="text" class="form-input" id="newHostTiktok" placeholder="username (tiktok.com/@username)">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostTelegram">Telegram</label>
-                <input type="text" class="form-input" id="newHostTelegram" placeholder="Telegram username">
+                <input type="text" class="form-input" id="newHostTelegram" placeholder="username (t.me/username)">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostYoutube">YouTube</label>
-                <input type="text" class="form-input" id="newHostYoutube" placeholder="YouTube channel">
+                <input type="text" class="form-input" id="newHostYoutube" placeholder="channel (youtube.com/channel)">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostAvatar">Profile Picture URL (Optional)</label>
+                <input type="text" class="form-input" id="newHostAvatar" placeholder="https://example.com/photo.jpg">
             </div>
             <div class="form-buttons">
                 <button class="cancel-btn" onclick="hideAddHostForm()">မထည့်တော့ပါ</button>
@@ -385,7 +412,7 @@
             <span style="font-size: 12px;">နမူနာ ID များကိုစမ်းရှာကြည့်ကြည့်ပါ</span>
             <div style="margin-top: 10px;">
                 <button class="add-host-btn" onclick="showAddHostForm()" style="font-size: 12px; padding: 6px 12px;">
-                    ➕ ဒီအချက်အလက်ကို အသစ်ထည့်မယ်
+                    ➕ ဒီအချက်အလက်ကို သိမ်းမယ်။
                 </button>
             </div>
         </div>
@@ -397,70 +424,84 @@
 
     <script>
         // ==================== CONFIGURATION ====================
-        // 🔧 သင့်ရဲ့ Google Apps Script URL ကို ဒီမှာထည့်ပါ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGV5fLf_v_Ut8xWp7iAL7WN7ob0KILd1-RPz5qITMiyL7O3OVP3Af20Rk8tV8QmO0iJw/exec';
         
+        // ==================== FIXED PROFILE PICTURES ====================
+        const defaultAvatars = [
+            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face', // Male 1
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face', // Male 2
+            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face', // Female 1
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face', // Female 2
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face', // Male 3
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face'  // Female 3
+        ];
+
         // ==================== INITIALIZATION ====================
         let tg = window.Telegram.WebApp;
         let hosts = {};
 
-        // Sample data for testing
+        // Sample data with FIXED TikTok links and consistent avatars
         const sampleHosts = {
             'sweet_mm_22': {
                 name: 'Hla Hla',
                 bigoId: 'sweet_mm_22',
                 facebook: 'sweet.hlahla',
                 instagram: 'sweet_hla',
-                tiktok: 'sweet_singer',
+                tiktok: 'sweet_singer', // FIXED: username only
                 telegram: 'hlahla',
                 youtube: 'hlahla_music',
-                avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+                avatar: defaultAvatars[2] // Consistent female avatar
             },
             'game_king': {
                 name: 'Min Ko',
                 bigoId: 'game_king',
                 facebook: 'minko.gamer',
                 instagram: 'minko_games',
-                tiktok: 'none',
+                tiktok: 'minko_gaming', // FIXED: username only
                 telegram: 'minko',
                 youtube: 'minko_gaming',
-                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+                avatar: defaultAvatars[0] // Consistent male avatar
             },
             'dance_queen': {
                 name: 'Su Su',
                 bigoId: 'dance_queen',
-                facebook: 'none',
+                facebook: 'susu.dancer',
                 instagram: 'susu_dancer',
-                tiktok: 'susu_dance',
+                tiktok: 'susu_dance', // FIXED: username only
                 telegram: 'susu',
-                youtube: 'none',
-                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+                youtube: 'susu_dance',
+                avatar: defaultAvatars[3] // Consistent female avatar
             }
         };
 
-        // ==================== SOCIAL BUTTONS FUNCTIONS ====================
+        // ==================== FIXED SOCIAL BUTTONS FUNCTIONS ====================
         function createSocialButtons(host) {
             const socialLinks = document.getElementById('socialLinks');
             socialLinks.innerHTML = '';
             
+            // FIXED: Facebook link
             if (host.facebook && host.facebook !== 'none') {
                 createSocialButton('facebook', 'https://facebook.com/' + host.facebook, '📘 Facebook', socialLinks);
             }
             
+            // FIXED: Instagram link
             if (host.instagram && host.instagram !== 'none') {
                 createSocialButton('instagram', 'https://instagram.com/' + host.instagram, '📷 Instagram', socialLinks);
             }
             
+            // FIXED: TikTok link - CORRECT FORMAT
             if (host.tiktok && host.tiktok !== 'none') {
-                createSocialButton('tiktok', 'https://tiktok.com/@' + host.tiktok, '🎵 TikTok', socialLinks);
+                createSocialButton('tiktok', 'https://www.tiktok.com/@' + host.tiktok, '🎵 TikTok', socialLinks);
             }
             
+            // FIXED: Telegram link
             if (host.telegram && host.telegram !== 'none') {
                 createSocialButton('telegram', 'https://t.me/' + host.telegram, '✈️ Telegram', socialLinks);
             }
             
+            // FIXED: YouTube link
             if (host.youtube && host.youtube !== 'none') {
-                createSocialButton('youtube', 'https://youtube.com/' + host.youtube, '📺 YouTube', socialLinks);
+                createSocialButton('youtube', 'https://youtube.com/@' + host.youtube, '📺 YouTube', socialLinks);
             }
             
             if (socialLinks.children.length === 0) {
@@ -480,7 +521,20 @@
             button.href = url;
             button.target = '_blank';
             button.innerHTML = text;
+            
+            // Test the link when clicked
+            button.onclick = function(e) {
+                console.log(`Opening: ${url}`);
+                // Let the default link behavior happen
+            };
+            
             container.appendChild(button);
+        }
+
+        // ==================== FIXED AVATAR FUNCTION ====================
+        function getRandomAvatar() {
+            // Return a random avatar from our fixed list
+            return defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
         }
 
         // ==================== MAIN FUNCTIONS ====================
@@ -502,6 +556,7 @@
                     hosts = {};
                     result.data.forEach(item => {
                         if (item.BIGO_ID) {
+                            // FIXED: Use provided avatar or random from fixed list
                             hosts[item.BIGO_ID] = {
                                 name: item.Name || '',
                                 bigoId: item.BIGO_ID,
@@ -510,11 +565,11 @@
                                 tiktok: item.TikTok || 'none',
                                 telegram: item.Telegram || 'none',
                                 youtube: item.YouTube || 'none',
-                                avatar: item.Avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                                avatar: item.Avatar || getRandomAvatar() // FIXED: Consistent avatars
                             };
                         }
                     });
-                    console.log('Google Sheets မှ အချက်အလက်များ ရယူပြီးပါပြီ');
+                    console.log('Reload Data');
                 } else {
                     hosts = sampleHosts;
                     console.log('Sample data သုံးထားပါတယ်');
@@ -545,7 +600,7 @@
                                 tiktok: item.TikTok || 'none',
                                 telegram: item.Telegram || 'none',
                                 youtube: item.YouTube || 'none',
-                                avatar: item.Avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                                avatar: item.Avatar || getRandomAvatar() // FIXED: Consistent avatars
                             };
                         }
                     });
@@ -627,6 +682,7 @@
             document.getElementById('newHostTiktok').value = '';
             document.getElementById('newHostTelegram').value = '';
             document.getElementById('newHostYoutube').value = '';
+            document.getElementById('newHostAvatar').value = '';
         }
 
         function showSuccessMessage() {
@@ -643,80 +699,7 @@
             document.getElementById('loading').style.display = 'block';
         }
 
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        async function submitNewHost() {
-            const name = document.getElementById('newHostName').value.trim();
-            const bigoId = document.getElementById('newHostBigoId').value.trim();
-            const facebook = document.getElementById('newHostFacebook').value.trim();
-            const instagram = document.getElementById('newHostInstagram').value.trim();
-            const tiktok = document.getElementById('newHostTiktok').value.trim();
-            const telegram = document.getElementById('newHostTelegram').value.trim();
-            const youtube = document.getElementById('newHostYoutube').value.trim();
-            
-            if (!name || !bigoId) {
-                alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
-                return;
-            }
-            
-            try {
-                showLoading('အချက်အလက်များ သိမ်းဆည်းနေပါသည်...');
-                
-                const formData = new URLSearchParams();
-                formData.append('action', 'addData');
-                formData.append('name', name);
-                formData.append('bigo_id', bigoId);
-                formData.append('facebook', facebook || 'none');
-                formData.append('instagram', instagram || 'none');
-                formData.append('tiktok', tiktok || 'none');
-                formData.append('telegram', telegram || 'none');
-                formData.append('youtube', youtube || 'none');
-                
-                console.log('Sending data to Google Sheets...');
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                console.log('Google Sheets Response:', result);
-                
-                if (result.status === 'success') {
-                    // Immediately add to local hosts object
-                    hosts[bigoId] = {
-                        name: name,
-                        bigoId: bigoId,
-                        facebook: facebook || 'none',
-                        instagram: instagram || 'none',
-                        tiktok: tiktok || 'none',
-                        telegram: telegram || 'none',
-                        youtube: youtube || 'none',
-                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
-                    };
-                    
-                    console.log('Added to local hosts:', hosts[bigoId]);
-                    
-                    showSuccessMessage();
-                    hideAddHostForm();
-                    
-                    // Auto-search for the new host
-                    document.getElementById('searchInput').value = bigoId;
-                    setTimeout(() => {
-                        searchHost();
-                    }, 1000);
-                    
-                } else {
-                    throw new Error(result.data);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                // Data might still be saved to Google Sheets despite CORS error
-                const confirmSave = confirm(
-                    'အချက်အလက်များ Google Sheets ထဲရောက်နိုင်ပါတယ်။\n\n' +
-                    'ဒီ ID ကို ချက်ချင်းရှာကြည့်မလား?\n\n' +
+     တယ်?\n\n' +
                     'BIGO ID: ' + bigoId
                 );
                 
@@ -730,7 +713,7 @@
                         tiktok: tiktok || 'none',
                         telegram: telegram || 'none',
                         youtube: youtube || 'none',
-                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                        avatar: avatar || getRandomAvatar() // FIXED: Consistent avatar
                     };
                     
                     hideAddHostForm();
