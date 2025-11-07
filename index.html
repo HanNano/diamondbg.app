@@ -154,6 +154,8 @@
         .social-btn.facebook { background: #1877f2; }
         .social-btn.instagram { background: #e4405f; }
         .social-btn.tiktok { background: #000000; }
+        .social-btn.telegram { background: #0088cc; }
+        .social-btn.youtube { background: #ff0000; }
         
         .no-result {
             background: white;
@@ -201,7 +203,6 @@
             background: #5a6fd8;
         }
         
-        /* New styles for add host form */
         .add-host-form {
             background: white;
             padding: 20px;
@@ -265,41 +266,11 @@
             cursor: pointer;
         }
         
-        .add-host-instructions {
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            line-height: 1.5;
-            display: none;
-        }
-        
-        .instructions-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        
-        .instructions-list {
-            padding-left: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .instructions-list li {
-            margin-bottom: 5px;
-        }
-        
-        .close-btn {
-            background: #6c757d;
+        .loading {
+            text-align: center;
+            padding: 10px;
             color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            display: block;
-            margin: 0 auto;
+            display: none;
         }
     </style>
 </head>
@@ -344,31 +315,28 @@
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostFacebook">Facebook</label>
-                <input type="text" class="form-input" id="newHostFacebook" placeholder="Facebook Username(username)">
+                <input type="text" class="form-input" id="newHostFacebook" placeholder="Facebook Username">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostInstagram">Instagram</label>
-                <input type="text" class="form-input" id="newHostInstagram" placeholder="Instagram username (username)">
+                <input type="text" class="form-input" id="newHostInstagram" placeholder="Instagram username">
             </div>
             <div class="form-group">
                 <label class="form-label" for="newHostTiktok">TikTok</label>
-                <input type="text" class="form-input" id="newHostTiktok" placeholder="TikTok username (username)">
+                <input type="text" class="form-input" id="newHostTiktok" placeholder="TikTok username">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostTelegram">Telegram</label>
+                <input type="text" class="form-input" id="newHostTelegram" placeholder="Telegram username">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newHostYoutube">YouTube</label>
+                <input type="text" class="form-input" id="newHostYoutube" placeholder="YouTube channel">
             </div>
             <div class="form-buttons">
                 <button class="cancel-btn" onclick="hideAddHostForm()">မထည့်တော့ပါ</button>
                 <button class="submit-btn" onclick="submitNewHost()">အတည်ပြုပြီးပို့မယ်</button>
             </div>
-        </div>
-        
-        <div class="add-host-instructions" id="addHostInstructions">
-            <div class="instructions-title">အသစ်ထည့်ရန် ညွှန်ကြားချက်များ</div>
-            <ul class="instructions-list">
-                <li>နမူနာပြထားတဲ့အတိုင်း အချက်အလက်များကိုဖြည့်ပေးပါရှင့်</li>
-                <li>အတည်ပြုပြီးရင် ခလုတ်ကို နှိပ်လိုက်ပါရှင့်</li>
-                <li>အချက်အလက်များကို စစ်ဆေးပြီးရင်ဒီရှာဖွေရေးစနစ်ထဲထည့်ထားလိုက်ပါပြီ</li>
-                <li>အကူအညီလိုပါက @onesima_bot ကို စိတ်ကြိုက်မေးနိုင်ပါတယ်ရှင့်</li>
-            </ul>
-            <button class="close-btn" onclick="hideInstructions()">ပိတ်မယ်</button>
         </div>
         
         <div class="host-card" id="hostResult">
@@ -380,8 +348,8 @@
                 </div>
             </div>
             
+            <!-- Social buttons will be added here by JavaScript -->
             <div class="social-links" id="socialLinks">
-                <!-- Social buttons will be added here by JavaScript -->
             </div>
         </div>
         
@@ -395,17 +363,32 @@
                 </button>
             </div>
         </div>
+        
+        <div class="loading" id="loading">
+            🔄 ရှာဖွေနေပါသည်...
+        </div>
     </div>
 
     <script>
-        // Sample data with REAL hosts
-        const hosts = {
+        // Google Apps Script URL - သင့်ရဲ့ Google Apps Script URL ကို ဒီနေရာမှာ ထည့်ပါ
+        const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        
+        // Telegram Web App initialization
+        let tg = window.Telegram.WebApp;
+        
+        // Global hosts data - initially empty, will be loaded from Google Sheets
+        let hosts = {};
+        
+        // Sample data for testing (Google Sheets မချိတ်ခင် စမ်းသပ်ဖို့)
+        const sampleHosts = {
             'sweet_mm_22': {
                 name: 'Hla Hla',
                 bigoId: 'sweet_mm_22',
                 facebook: 'sweet.hlahla',
                 instagram: 'sweet_hla',
                 tiktok: 'sweet_singer',
+                telegram: 'hlahla',
+                youtube: 'hlahla_music',
                 avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
             },
             'game_king': {
@@ -414,37 +397,79 @@
                 facebook: 'minko.gamer',
                 instagram: 'minko_games',
                 tiktok: 'none',
+                telegram: 'minko',
+                youtube: 'minko_gaming',
                 avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-            },
-            'dance_queen': {
-                name: 'Su Su',
-                bigoId: 'dance_queen',
-                facebook: 'none',
-                instagram: 'susu_dancer',
-                tiktok: 'susu_dance',
-                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
-            },
-            'star_live_88': {
-                name: 'Aung Aung',
-                bigoId: 'star_live_88',
-                facebook: 'aung.live',
-                instagram: 'aung_star',
-                tiktok: 'aung_tiktok',
-                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-            },
-            'myanmar_singer': {
-                name: 'Khin Khin',
-                bigoId: 'myanmar_singer',
-                facebook: 'khin.music',
-                instagram: 'khin_singer',
-                tiktok: 'khin_music',
-                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face'
             }
         };
 
-        // Telegram Web App initialization
-        let tg = window.Telegram.WebApp;
-        
+        // ==================== SOCIAL BUTTONS CREATION FUNCTIONS ====================
+
+        // Social buttons တွေကို dynamic ဖန်တီးပေးတဲ့ function
+        function createSocialButtons(host) {
+            const socialLinks = document.getElementById('socialLinks');
+            socialLinks.innerHTML = ''; // ရှိပြီးသား content တွေကို ရှင်းလင်းခြင်း
+            
+            console.log('Creating social buttons for:', host);
+            
+            // Facebook button ဖန်တီးခြင်း
+            if (host.facebook && host.facebook !== 'none') {
+                createSocialButton('facebook', 'https://facebook.com/' + host.facebook, '📘 Facebook', socialLinks);
+            }
+            
+            // Instagram button ဖန်တီးခြင်း
+            if (host.instagram && host.instagram !== 'none') {
+                createSocialButton('instagram', 'https://instagram.com/' + host.instagram, '📷 Instagram', socialLinks);
+            }
+            
+            // TikTok button ဖန်တီးခြင်း
+            if (host.tiktok && host.tiktok !== 'none') {
+                createSocialButton('tiktok', 'https://tiktok.com/@' + host.tiktok, '🎵 TikTok', socialLinks);
+            }
+            
+            // Telegram button ဖန်တီးခြင်း
+            if (host.telegram && host.telegram !== 'none') {
+                createSocialButton('telegram', 'https://t.me/' + host.telegram, '✈️ Telegram', socialLinks);
+            }
+            
+            // YouTube button ဖန်တီးခြင်း
+            if (host.youtube && host.youtube !== 'none') {
+                createSocialButton('youtube', 'https://youtube.com/' + host.youtube, '📺 YouTube', socialLinks);
+            }
+            
+            // Social buttons မရှိရင် message ပြခြင်း
+            if (socialLinks.children.length === 0) {
+                const noSocialMsg = document.createElement('div');
+                noSocialMsg.textContent = 'Social media accounts မရှိသေးပါ';
+                noSocialMsg.style.color = '#666';
+                noSocialMsg.style.fontSize = '12px';
+                noSocialMsg.style.textAlign = 'center';
+                noSocialMsg.style.padding = '10px';
+                socialLinks.appendChild(noSocialMsg);
+            }
+        }
+
+        // Individual social button ဖန်တီးပေးတဲ့ helper function
+        function createSocialButton(platform, url, text, container) {
+            const button = document.createElement('a');
+            button.className = `social-btn ${platform}`;
+            button.href = url;
+            button.target = '_blank';
+            button.innerHTML = text;
+            button.onclick = function() {
+                // Telegram Web App ရှိရင် haptic feedback ပေးခြင်း
+                if (typeof tg !== 'undefined') {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+                
+                // Analytics အတွက် log ရိုက်ခြင်း
+                console.log(`Social button clicked: ${platform} - ${url}`);
+            };
+            container.appendChild(button);
+        }
+
+        // ==================== MAIN APPLICATION FUNCTIONS ====================
+
         function initTelegram() {
             if (typeof tg !== 'undefined') {
                 tg.expand();
@@ -453,6 +478,50 @@
                 if (tg.colorScheme === 'dark') {
                     document.body.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
                 }
+            }
+            
+            // Load initial data from Google Sheets
+            loadHostsFromGoogleSheets();
+        }
+
+        // Load hosts data from Google Sheets
+        async function loadHostsFromGoogleSheets() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                const response = await fetch(SCRIPT_URL + '?action=getData');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Convert array data to object format
+                    hosts = {};
+                    result.data.forEach(item => {
+                        if (item.BIGO_ID) {
+                            hosts[item.BIGO_ID] = {
+                                name: item.Name || '',
+                                bigoId: item.BIGO_ID,
+                                facebook: item.Facebook || 'none',
+                                instagram: item.Instagram || 'none',
+                                tiktok: item.TikTok || 'none',
+                                telegram: item.Telegram || 'none',
+                                youtube: item.YouTube || 'none',
+                                avatar: item.Avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                            };
+                        }
+                    });
+                    
+                    console.log('Loaded hosts from Google Sheets:', hosts);
+                } else {
+                    console.error('Error loading data from Google Sheets:', result.data);
+                    // Fallback to sample data
+                    hosts = sampleHosts;
+                }
+            } catch (error) {
+                console.error('Network error loading data:', error);
+                // Fallback to sample data
+                hosts = sampleHosts;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
@@ -467,13 +536,11 @@
             const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
             const hostResult = document.getElementById('hostResult');
             const noResult = document.getElementById('noResult');
-            const socialLinks = document.getElementById('socialLinks');
             
             // Hide both first
             hostResult.style.display = 'none';
             noResult.style.display = 'none';
             hideAddHostForm();
-            hideInstructions();
             
             if (!searchTerm) {
                 noResult.style.display = 'block';
@@ -527,36 +594,8 @@
                 document.getElementById('hostBigoId').textContent = foundHost.bigoId;
                 document.getElementById('hostAvatar').src = foundHost.avatar;
                 
-                // Clear previous social links
-                socialLinks.innerHTML = '';
-                
-                // Add social buttons
-                if (foundHost.facebook !== 'none') {
-                    const fbBtn = document.createElement('a');
-                    fbBtn.className = 'social-btn facebook';
-                    fbBtn.href = 'https://facebook.com/' + foundHost.facebook;
-                    fbBtn.target = '_blank';
-                    fbBtn.innerHTML = '📘 Facebook';
-                    socialLinks.appendChild(fbBtn);
-                }
-                
-                if (foundHost.instagram !== 'none') {
-                    const igBtn = document.createElement('a');
-                    igBtn.className = 'social-btn instagram';
-                    igBtn.href = 'https://instagram.com/' + foundHost.instagram;
-                    igBtn.target = '_blank';
-                    igBtn.innerHTML = '📷 Instagram';
-                    socialLinks.appendChild(igBtn);
-                }
-                
-                if (foundHost.tiktok !== 'none') {
-                    const ttBtn = document.createElement('a');
-                    ttBtn.className = 'social-btn tiktok';
-                    ttBtn.href = 'https://tiktok.com/@' + foundHost.tiktok;
-                    ttBtn.target = '_blank';
-                    ttBtn.innerHTML = '🎵 TikTok';
-                    socialLinks.appendChild(ttBtn);
-                }
+                // Social buttons တွေ ဖန်တီးပေးခြင်း
+                createSocialButtons(foundHost);
                 
                 hostResult.style.display = 'block';
                 
@@ -573,7 +612,6 @@
             document.getElementById('addHostForm').style.display = 'block';
             document.getElementById('hostResult').style.display = 'none';
             document.getElementById('noResult').style.display = 'none';
-            document.getElementById('addHostInstructions').style.display = 'none';
         }
         
         function hideAddHostForm() {
@@ -584,64 +622,81 @@
             document.getElementById('newHostFacebook').value = '';
             document.getElementById('newHostInstagram').value = '';
             document.getElementById('newHostTiktok').value = '';
+            document.getElementById('newHostTelegram').value = '';
+            document.getElementById('newHostYoutube').value = '';
         }
         
-        function showInstructions() {
-            document.getElementById('addHostInstructions').style.display = 'block';
-            document.getElementById('addHostForm').style.display = 'none';
-        }
-        
-        function hideInstructions() {
-            document.getElementById('addHostInstructions').style.display = 'none';
-        }
-        
-        function submitNewHost() {
+        // Submit new host to Google Sheets
+        async function submitNewHost() {
             const name = document.getElementById('newHostName').value.trim();
             const bigoId = document.getElementById('newHostBigoId').value.trim();
             const facebook = document.getElementById('newHostFacebook').value.trim();
             const instagram = document.getElementById('newHostInstagram').value.trim();
             const tiktok = document.getElementById('newHostTiktok').value.trim();
+            const telegram = document.getElementById('newHostTelegram').value.trim();
+            const youtube = document.getElementById('newHostYoutube').value.trim();
             
             if (!name || !bigoId) {
                 alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
                 return;
             }
             
-            // Create host data object
-            const newHost = {
-                name: name,
-                bigoId: bigoId,
-                facebook: facebook || 'none',
-                instagram: instagram || 'none',
-                tiktok: tiktok || 'none',
-                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
-            };
-            
-            // In a real app, you would send this data to a server
-            // For demo purposes, we'll just show a success message
-            
-            if (typeof tg !== 'undefined') {
-                // Send data to Telegram bot
-                tg.sendData(JSON.stringify({
-                    action: 'add_host',
-                    host_data: newHost
-                }));
+            try {
+                document.getElementById('loading').style.display = 'block';
                 
-                tg.showPopup({
-                    title: 'ကျေးဇူးတင်ပါတယ်',
-                    message: 'သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။ အတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။',
-                    buttons: [{ type: 'ok' }]
+                const params = new URLSearchParams({
+                    action: 'addData',
+                    name: name,
+                    bigo_id: bigoId,
+                    facebook: facebook || 'none',
+                    instagram: instagram || 'none',
+                    tiktok: tiktok || 'none',
+                    telegram: telegram || 'none',
+                    youtube: youtube || 'none'
                 });
-            } else {
-                // Fallback for non-Telegram environment
-                alert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
-                      '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
                 
-                // For demo, add to local hosts object
-                hosts[bigoId] = newHost;
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Success message
+                    if (typeof tg !== 'undefined') {
+                        tg.showPopup({
+                            title: 'ကျေးဇူးတင်ပါတယ်',
+                            message: 'သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။ အတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } else {
+                        alert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
+                              '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
+                    }
+                    
+                    // Add to local hosts object for immediate use
+                    hosts[bigoId] = {
+                        name: name,
+                        bigoId: bigoId,
+                        facebook: facebook || 'none',
+                        instagram: instagram || 'none',
+                        tiktok: tiktok || 'none',
+                        telegram: telegram || 'none',
+                        youtube: youtube || 'none',
+                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                    };
+                    
+                    hideAddHostForm();
+                } else {
+                    throw new Error(result.data);
+                }
+            } catch (error) {
+                console.error('Error adding host:', error);
+                alert('အချက်အလက်များ သိမ်းဆည်းရာတွင် အမှားတစ်ခုဖြစ်ပွားနေပါသည်။ ကျေးဇူးပြု၍ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
-            
-            hideAddHostForm();
         }
 
         // Enter key support
