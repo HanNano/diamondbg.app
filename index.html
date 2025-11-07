@@ -371,7 +371,7 @@
 
     <script>
         // Google Apps Script URL - သင့်ရဲ့ Google Apps Script URL ကို ဒီနေရာမှာ ထည့်ပါ
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwF0KjBb7jGMrjCapUa1VRCS-LHAzvVBs5a4eA9R4imTG2t9S-qxMIKon5ZrQQRqoDb/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbyKGaXjY7oC8erltStujr34x-Tzl3eQJ5_TtL57P6PjR6D1iD-0lTBrGgvTbupIfA2e/exec';
         
         // Telegram Web App initialization
         let tg = window.Telegram.WebApp;
@@ -699,12 +699,19 @@
     } catch (error) {
         console.error('Error adding host:', error);
         
-
-            
-    } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+         // More specific error messages
+        if (error.message.includes('CORS')) {
+            alert('❌ CORS Error: Google Apps Script URL ကို ပြန်စစ်ပါ\n\n1. Deploy > New deployment လုပ်ပါ\n2. Execute as: "Me" ရွေးပါ\n3. Who has access: "Anyone" ရွေးပါ');
+        } else if (error.message.includes('Network')) {
+            alert('❌ Network Error: အင်တာနက် ချိတ်ဆက်မှု ပြန်စစ်ပါ');
+        } else {
+            alert('❌ အမှား: ' + error.message + '\n\nGoogle Apps Script URL နဲ့ Sheet ID ကို ပြန်စစ်ပါ');
         }
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
 
         // Enter key support
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
