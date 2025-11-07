@@ -635,66 +635,73 @@
             const tiktok = document.getElementById('newHostTiktok').value.trim();
             const telegram = document.getElementById('newHostTelegram').value.trim();
             const youtube = document.getElementById('newHostYoutube').value.trim();
+    
+        if (!name || !bigoId) {
+        alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
+        return;
+        }
+    
+        try {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').textContent = '🔄 အချက်အလက်များ သိမ်းဆည်းနေပါသည်...';
+        
+        // Prepare data for sending
+        const formData = {
+            action: 'addData',
+            name: name,
+            bigo_id: bigoId,
+            facebook: facebook || 'none',
+            instagram: instagram || 'none', 
+            tiktok: tiktok || 'none',
+            telegram: telegram || 'none',
+            youtube: youtube || 'none'
+        };
+        
+        console.log('Sending data:', formData);
+        
+        const params = new URLSearchParams(formData);
+        
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params
+        });     
+        
+        const result = await response.json();
+        console.log('Server response:', result);
+        
+        if (result.status === 'success') {
+            // Success message
+            alert('✅ အောင်မြင်ပါသည်! အချက်အလက်များ သိမ်းဆည်းပြီးပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId);
+                
+            // Add to local hosts object for immediate use
+            hosts[bigoId] = {
+                name: name,
+                bigoId: bigoId,
+                facebook: facebook || 'none',
+                instagram: instagram || 'none',
+                tiktok: tiktok || 'none',
+                telegram: telegram || 'none',
+                youtube: youtube || 'none',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+            };
+                                    
+            hideAddHostForm();
+
+            // Auto-search for the newly added host
+            document.getElementById('searchInput').value = bigoId;
+            setTimeout(() => searchHost(), 500);
+        } else {
+            throw new Error(result.data || 'Unknown error');
+        }
+    } catch (error) {
+        console.error('Error adding host:', error);
+        
+
             
-            if (!name || !bigoId) {
-                alert('ကျေးဇူးပြု၍ အမည်နှင့် BIGO ID ကိုဖြည့်ပါ');
-                return;
-            }
-            
-            try {
-                document.getElementById('loading').style.display = 'block';
-                
-                const params = new URLSearchParams({
-                    action: 'addData',
-                    name: name,
-                    bigo_id: bigoId,
-                    facebook: facebook || 'none',
-                    instagram: instagram || 'none',
-                    tiktok: tiktok || 'none',
-                    telegram: telegram || 'none',
-                    youtube: youtube || 'none'
-                });
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: params
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    // Success message
-                    if (typeof tg !== 'undefined') {
-                        tg.showPopup({
-                            title: 'ကျေးဇူးတင်ပါတယ်',
-                            message: 'သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။ အတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။',
-                            buttons: [{ type: 'ok' }]
-                        });
-                    } else {
-                        alert('ကျေးဇူးတင်ပါတယ်! သင့်ရဲ့အချက်အလက်များကို လက်ခံရရှိပါပြီ။\n\nအမည်: ' + name + '\nBIGO ID: ' + bigoId + 
-                              '\n\nအတည်ပြုပြီးနောက် ဒီရှာဖွေရေးစနစ်ထဲသို့ ထည့်သွင်းပေးပါမည်။');
-                    }
-                    
-                    // Add to local hosts object for immediate use
-                    hosts[bigoId] = {
-                        name: name,
-                        bigoId: bigoId,
-                        facebook: facebook || 'none',
-                        instagram: instagram || 'none',
-                        tiktok: tiktok || 'none',
-                        telegram: telegram || 'none',
-                        youtube: youtube || 'none',
-                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
-                    };
-                    
-                    hideAddHostForm();
-                } else {
-                    throw new Error(result.data);
-                }
-            } catch (error) {
-                console.error('Error adding host:', error);
-                alert('အချက်အလက်များ သိမ်းဆည်းရာတွင် အမှားတစ်ခုဖြစ်ပွားနေပါသည်။ ကျေးဇူးပြု၍ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။');
-            } finally {
+    } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
