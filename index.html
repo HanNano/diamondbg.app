@@ -82,6 +82,18 @@
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
+            margin-bottom: 5px;
+        }
+        
+        .reload-btn {
+            width: 100%;
+            padding: 8px;
+            background: #ffc107;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
         }
         
         .host-card {
@@ -309,6 +321,9 @@
             <button class="add-host-btn" onclick="showAddHostForm()">
                 ➕ အသစ်ထည့်မယ်
             </button>
+            <button class="reload-btn" onclick="reloadData()">
+                🔄 Google Sheets မှ အချက်အလက်များ ပြန်ခေါ်မယ်
+            </button>
         </div>
 
         <div class="success-message" id="successMessage">
@@ -360,7 +375,6 @@
                 </div>
             </div>
             
-            <!-- Social buttons will be added here by JavaScript -->
             <div class="social-links" id="socialLinks">
             </div>
         </div>
@@ -513,6 +527,39 @@
             }
         }
 
+        async function reloadData() {
+            try {
+                showLoading('အချက်အလက်များ ပြန်လည်ခေါ်ယူနေပါသည်...');
+                const response = await fetch(SCRIPT_URL + '?action=getData');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    hosts = {};
+                    result.data.forEach(item => {
+                        if (item.BIGO_ID) {
+                            hosts[item.BIGO_ID] = {
+                                name: item.Name || '',
+                                bigoId: item.BIGO_ID,
+                                facebook: item.Facebook || 'none',
+                                instagram: item.Instagram || 'none',
+                                tiktok: item.TikTok || 'none',
+                                telegram: item.Telegram || 'none',
+                                youtube: item.YouTube || 'none',
+                                avatar: item.Avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                            };
+                        }
+                    });
+                    console.log('Reloaded data from Google Sheets:', Object.keys(hosts));
+                    alert('✅ အချက်အလက်များ ပြန်လည်ခေါ်ယူပြီးပါပြီ။\nစုစုပေါင်း: ' + Object.keys(hosts).length + ' ယောက်');
+                }
+            } catch (error) {
+                console.error('Reload error:', error);
+                alert('❌ အချက်အလက်များ ခေါ်ယူရာတွင် အမှားတစ်ခုဖြစ်နေပါသည်');
+            } finally {
+                hideLoading();
+            }
+        }
+
         function searchSample(bigoId) {
             document.getElementById('searchInput').value = bigoId;
             searchHost();
@@ -538,12 +585,16 @@
             const cleanSearchTerm = searchTerm.replace('@', '');
             
             for (const [id, host] of Object.entries(hosts)) {
-                if (id.toLowerCase().includes(cleanSearchTerm) ||
+                if (id.toLowerCase() === cleanSearchTerm ||
+                    id.toLowerCase().includes(cleanSearchTerm) ||
                     host.name.toLowerCase().includes(cleanSearchTerm) ||
                     (host.facebook !== 'none' && host.facebook.toLowerCase().includes(cleanSearchTerm)) ||
                     (host.instagram !== 'none' && host.instagram.toLowerCase().includes(cleanSearchTerm)) ||
-                    (host.tiktok !== 'none' && host.tiktok.toLowerCase().includes(cleanSearchTerm))) {
+                    (host.tiktok !== 'none' && host.tiktok.toLowerCase().includes(cleanSearchTerm)) ||
+                    (host.telegram !== 'none' && host.telegram.toLowerCase().includes(cleanSearchTerm)) ||
+                    (host.youtube !== 'none' && host.youtube.toLowerCase().includes(cleanSearchTerm))) {
                     foundHost = host;
+                    console.log('Found host:', foundHost);
                     break;
                 }
             }
@@ -555,6 +606,7 @@
                 createSocialButtons(foundHost);
                 hostResult.style.display = 'block';
             } else {
+                console.log('No host found for:', searchTerm);
                 noResult.style.display = 'block';
             }
         }
@@ -622,15 +674,54 @@
                 formData.append('telegram', telegram || 'none');
                 formData.append('youtube', youtube || 'none');
                 
+                console.log('Sending data to Google Sheets...');
+                
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: formData
                 });
                 
                 const result = await response.json();
+                console.log('Google Sheets Response:', result);
                 
                 if (result.status === 'success') {
+                    // Immediately add to local hosts object
+                    hosts[bigoId] = {
+                        name: name,
+                        bigoId: bigoId,
+                        facebook: facebook || 'none',
+                        instagram: instagram || 'none',
+                        tiktok: tiktok || 'none',
+                        telegram: telegram || 'none',
+                        youtube: youtube || 'none',
+                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
+                    };
+                    
+                    console.log('Added to local hosts:', hosts[bigoId]);
+                    
                     showSuccessMessage();
+                    hideAddHostForm();
+                    
+                    // Auto-search for the new host
+                    document.getElementById('searchInput').value = bigoId;
+                    setTimeout(() => {
+                        searchHost();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Data might still be saved to Google Sheets despite CORS error
+                const confirmSave = confirm(
+                    'အချက်အလက်များ Google Sheets ထဲရောက်နိုင်ပါတယ်။\n\n' +
+                    'ဒီ ID ကို ချက်ချင်းရှာကြည့်မလား?\n\n' +
+                    'BIGO ID: ' + bigoId
+                );
+                
+                if (confirmSave) {
+                    // Add to local hosts anyway
                     hosts[bigoId] = {
                         name: name,
                         bigoId: bigoId,
@@ -644,12 +735,8 @@
                     
                     hideAddHostForm();
                     document.getElementById('searchInput').value = bigoId;
-                    setTimeout(() => searchHost(), 1000);
-                } else {
-                    throw new Error(result.data);
+                    setTimeout(() => searchHost(), 500);
                 }
-            } catch (error) {
-                alert('အမှား: ' + error.message + '\n\nGoogle Apps Script URL ကို ပြန်စစ်ပါ');
             } finally {
                 hideLoading();
             }
